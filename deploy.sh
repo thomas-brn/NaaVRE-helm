@@ -24,6 +24,7 @@ Options:
 Actions:
   repo-add              add repositories for subcharts of naavre/
   install-keycloak-operator   install the keycloak operator in the current namespace
+  patch-coredns               idempotently patch CoreDNS for *.minikube.test (minikube only)
   dependency-build      rebuild the naavre/charts/ directory based on the naavre/Chart.lock file
   dependency-update     update naavre/charts/ based on the contents of naavre/Chart.yaml
   lint                  lint values/ and naavre/ helm charts
@@ -49,6 +50,7 @@ g_dry_run=0
 g_allowed_actions=(
   "repo-add"
   "install-keycloak-operator"
+  "patch-coredns"
   "dependency-build"
   "dependency-update"
   "lint"
@@ -143,10 +145,39 @@ gen_kubectl_create_namespace() {
 
 gen_kubectl_install_keycloak_operator() {
   keycloak_version="26.4.2"
-  cmd="kubectl $(gen_kubectl_common_options) apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/$keycloak_version/kubernetes/keycloaks.k8s.keycloak.org-v1.yml"
-  cmd+=" && kubectl $(gen_kubectl_common_options) apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/$keycloak_version/kubernetes/keycloakrealmimports.k8s.keycloak.org-v1.yml"
-  cmd+=" && kubectl $(gen_kubectl_common_options) apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/$keycloak_version/kubernetes/kubernetes.yml"
+  kubectl_opts="$(gen_kubectl_common_options)"
+  cmd="kubectl $kubectl_opts apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/$keycloak_version/kubernetes/keycloaks.k8s.keycloak.org-v1.yml"
+  cmd+=" && kubectl $kubectl_opts apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/$keycloak_version/kubernetes/keycloakrealmimports.k8s.keycloak.org-v1.yml"
+  cmd+=" && kubectl $kubectl_opts apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/$keycloak_version/kubernetes/kubernetes.yml"
+  if [[ -n "$g_namespace" ]]; then
+    # Upstream manifest binds ClusterRoleBinding to namespace "keycloak".
+    cmd+=" && kubectl patch clusterrolebinding keycloak-operator-clusterrole-binding --type=json"
+    cmd+=" -p='[{\"op\":\"replace\",\"path\":\"/subjects/0/namespace\",\"value\":\"$g_namespace\"}]'"
+    # JVM Quarkus needs ~60–90s on modest hardware; default startup probe is too tight.
+    cmd+=" && kubectl $kubectl_opts patch deployment keycloak-operator --type=json"
+    cmd+=" -p='[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/startupProbe/failureThreshold\",\"value\":30}]'"
+    cmd+=" && kubectl $kubectl_opts set env deployment/keycloak-operator JAVA_TOOL_OPTIONS- 2>/dev/null || true"
+    cmd+=" && kubectl $kubectl_opts rollout status deployment/keycloak-operator --timeout=300s"
+  fi
   echo "$cmd"
+}
+
+gen_kubectl_patch_coredns() {
+  echo "bash -c '
+set -euo pipefail
+MINIKUBE_IP=\$(minikube ip)
+COUNT=\$(kubectl -n kube-system get configmap coredns -o jsonpath=\"{.data.Corefile}\" | grep -c \"^test:53 {\" || true)
+if [ \"\$COUNT\" -ge 1 ]; then
+  echo \"CoreDNS patch already present (\$COUNT test:53 block(s)) — skipping.\"
+  exit 0
+fi
+cm=\$(kubectl -n kube-system get configmap/coredns -o json \\
+  | jq \".data.Corefile += \\\"\\\\ntest:53 {\\\\n    errors\\\\n    cache 30\\\\n    forward . \$MINIKUBE_IP\\\\n}\\\"\" \\
+  | jq \"del(.metadata)\")
+kubectl -n kube-system patch configmap/coredns --type merge -p \"\$cm\"
+kubectl -n kube-system rollout restart deployment/coredns
+kubectl -n kube-system rollout status deployment/coredns --timeout=120s
+'"
 }
 
 gen_helm_repo_add() {
@@ -297,6 +328,10 @@ main() {
     install-keycloak-operator)
       run_cmd "$(gen_kubectl_create_namespace)"
       run_cmd "$(gen_kubectl_install_keycloak_operator)"
+      ;;
+    patch-coredns)
+      check_k8s
+      run_cmd "$(gen_kubectl_patch_coredns)"
       ;;
     dependency-build)
       run_cmd "$(gen_helm_dependency_build "$action_options")"
