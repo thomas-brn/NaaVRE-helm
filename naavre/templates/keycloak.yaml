@@ -36,6 +36,11 @@ spec:
   additionalOptions:
     - name: http-relative-path
       value: {{ .Values.global.ingress.basePaths.keycloak }}
+    # Keep the management interface (health/metrics on port 9000) at the root path.
+    # Otherwise it inherits http-relative-path (/auth), and the Keycloak operator's
+    # probes (which target /health/ready) get a 404, so the pod is never marked ready.
+    - name: http-management-relative-path
+      value: /
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -136,7 +141,7 @@ spec:
         redirectUris:
           - /*
         enabled: true
-        publicClient: true
+        publicClient: false
         clientAuthenticatorType: client-secret
         secret: "{{ .Values.global.secrets.keycloak.client_secret }}"
         protocol: openid-connect

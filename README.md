@@ -46,7 +46,21 @@ Deploy the Keycloak operator ([documentation](https://www.keycloak.org/operator/
 ./deploy.sh --kube-context <k8s context> -n <namespace> install-keycloak-operator
 ```
 
-_Note: this can be skipped when using an external Keycloak instance (e.g. [values-example-external-keycloak.yaml](values/values-example-external-keycloak.yaml))._
+When deploying to **minikube**, also patch CoreDNS so `*.minikube.test` resolves inside the cluster
+(required by `values/values-deploy-minikube.yaml` for OIDC). Safe to re-run — skips if already patched:
+
+```shell
+./deploy.sh --kube-context minikube patch-coredns
+```
+
+`install-keycloak-operator` additionally applies minikube-specific fixes when `-n` is set:
+
+- patches `ClusterRoleBinding` subject namespace (upstream defaults to `keycloak`)
+- relaxes Keycloak operator startup probe (`failureThreshold: 30`)
+- removes accidental `JAVA_TOOL_OPTIONS=-Xint` if present
+- waits for operator rollout
+
+_Note: Keycloak operator can be skipped when using an external Keycloak instance (e.g. [values-example-external-keycloak.yaml](values/values-example-external-keycloak.yaml))._
 
 ### Additional initial setup for VLIC team members
 
@@ -89,8 +103,19 @@ To install or upgrade an existing deployment, use:
 For example, to install or upgrade the `minikube` deployment ([values/values-deploy-minikube.yaml](values/values-deploy-minikube.yaml)), run:
 
 ```shell
-./deploy.sh --kube-context minikube -n new-naavre -f values/values-deploy-minikube.yaml upgrade --install
+./deploy.sh --kube-context minikube patch-coredns
+./deploy.sh --kube-context minikube -n new-naavre install-keycloak-operator
+./deploy.sh --kube-context minikube -n new-naavre -f values/values-deploy-minikube.yaml upgrade --install --timeout 30m
 ```
+
+On **Apple Silicon Macs** running minikube inside an **emulated x86_64 VM** (OrbStack/UTM), also run
+after every upgrade (see [SETUP-VM-naavre.md](../SETUP-VM-naavre.md) for the full local setup guide):
+
+```shell
+./scripts/fix-keycloak-minikube.sh new-naavre naavre-dev.minikube.test
+```
+
+Native amd64 hosts do not need this script.
 
 To install or upgrade the `k8s-test-1` deployment ([values/values-deploy-k8s-test-1.public.yaml](values/values-deploy-k8s-test-1.public.yaml) and [values/values-deploy-k8s-test-1.secrets.yaml](values/values-deploy-k8s-test-1.secrets.yaml)), run:
 
