@@ -81,3 +81,18 @@ jupyterhub:
         cell_github_url: https://github.com/user/repo
         cell_github_token: fake-cell-github-token
         registry_url: ghcr.io/user/repo
+
+# Slow startup on emulated x86 VMs (collectstatic + S3/DB waits): default probes kill the pod
+# before gunicorn listens. Only needed for minikube dev — not for prod clusters.
+naavre-catalogue-service:
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 120
+    failureThreshold: 6
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 90
