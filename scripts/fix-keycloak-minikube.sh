@@ -59,7 +59,8 @@ cat > /tmp/kc-sts-patch.json <<EOF
 {"spec":{"template":{"spec":{"containers":[{"name":"keycloak",
   "env":[
     {"name":"JAVA_TOOL_OPTIONS","value":"-Xint"},
-    {"name":"QUARKUS_TRANSACTION_MANAGER_DEFAULT_TRANSACTION_TIMEOUT","value":"${TXN_TIMEOUT}"}
+    {"name":"QUARKUS_TRANSACTION_MANAGER_DEFAULT_TRANSACTION_TIMEOUT","value":"${TXN_TIMEOUT}"},
+    {"name":"QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT","value":"600S"}
   ],
   "startupProbe":{"httpGet":{"path":"/health/started","port":9000,"scheme":"HTTPS"},"initialDelaySeconds":30,"periodSeconds":15,"timeoutSeconds":10,"failureThreshold":200,"successThreshold":1},
   "livenessProbe":{"httpGet":{"path":"/health/live","port":9000,"scheme":"HTTPS"},"periodSeconds":30,"timeoutSeconds":10,"failureThreshold":12,"successThreshold":1},
