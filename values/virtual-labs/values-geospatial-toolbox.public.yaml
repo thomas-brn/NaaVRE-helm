@@ -10,15 +10,15 @@ jupyterhub:
       dirname: GeoSpatial Toolbox
       image:
         name: ghcr.io/naavre/flavors/naavre-fl-geospatial-toolbox-jupyter
-        tag: v0.3.5
+        tag: v0.3.6
       configuration:
-        base_image_tags_url: https://github.com/NaaVRE/flavors/releases/download/v0.3.5/base_image_tags.json
+        base_image_tags_url: https://github.com/NaaVRE/flavors/releases/download/v0.3.6/base_image_tags.json
         module_mapping_url: https://raw.githubusercontent.com/QCDIS/NaaVRE-conf/main/module_mapping.json
         cell_github_url: https://github.com/NaaVRE/cells-vl-geospatial-toolbox
         registry_url: ghcr.io/naavre/cells-vl-geospatial-toolbox
         log_queries: true
         splitter_max_branches: 32
         git_public:
-          repo: https://github.com/NaaVRE/vl-geospatial-toolbox.git
+          repo: https://github.com/LTER-LIFE/vl-geospatial-toolbox.git
           branch: main
         default_file_path: Virtual Labs/GeoSpatial Toolbox/Git public/README.md

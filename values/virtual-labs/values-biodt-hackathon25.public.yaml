@@ -12,9 +12,9 @@ jupyterhub:
         data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCEtLSBDcmVhdGVkIHdpdGggSW5rc2NhcGUgKGh0dHA6Ly93d3cuaW5rc2NhcGUub3JnLykgLS0+Cjxzdmcgd2lkdGg9IjMxLjc1bW0iIGhlaWdodD0iMzEuNzVtbSIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMzEuNzUgMzEuNzUiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMGY0ZThhIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Im0xOC41MTUgMC41ODE5OWMtMy45MjgzIDUuNTY5OS0yLjQ1MjYgMTAuOTg2IDEuNjA0NiAxNS4wNTcgMC42MDY0MSAxLjY3NjYgMC41NjYzNiA0LjY5NTQtMS4yMjY2IDcuMDQ4OC0zLjI3MjYgMC4zMTU5Ny02LjM2MzMtMi40MDU4LTYuODg1My00LjM4OSAzLjAxNS0wLjcgNC45Nzg2IDIuNzA5OSA2LjcwODQgMC42OTU0Ni0xLjgwNTYtMS4yMDc3LTEuNDA5OC0zLjIxNzMtMi4yMTYzLTUuMDAwNy0xLjM2MzUtMy4wMTQ5LTMuNjY5LTEuODYwOS0zLjQyMjEtNi44NzU0LTEuMzAzNiAxLjA0MTctMi4zNDYyIDIuMzkzOC0yLjc1MSAzLjQ1NzgtNS45NDM5IDMuNzQ5OC00LjgxMTYgMTEuNjE0IDAuMDQzMDkgMTUuMDQ4IDIuNDQ5MyAxLjczMjMgNS4wMzk3IDUuMDEzNCA1LjI0NzQgNS41NTIgMC4zMjIwNy0wLjU2MzM5IDIuNjI0MS0zLjUzNDMgNS4yMTQ3LTUuNTUyIDMuNjAxOS0yLjgwNTMgNS41MTYyLTcuMjY4MiA0LjI0MDEtMTIuNDI1LTEuNjI4OC02LjU4MTYtNS41NzI2LTUuNjgyNy02LjU1NjktMTIuNjE3eiIgc3Ryb2tlLXdpZHRoPSIxLjE2NDIiIHN0eWxlPSJwYWludC1vcmRlcjpmaWxsIG1hcmtlcnMgc3Ryb2tlIi8+PHBhdGggZD0ibTE1LjkwMSAxNi4xMzhjLTAuMTE5MzItMS40NDA0LTEuMjYzOS0xLjQ4MS0yLjA2OC0xLjY3NXoiIHN0cm9rZS13aWR0aD0iLjI2NDU4IiBzdHlsZT0icGFpbnQtb3JkZXI6ZmlsbCBtYXJrZXJzIHN0cm9rZSIvPjwvZz48L3N2Zz4K
       image:
         name: ghcr.io/naavre/flavors/naavre-fl-biodt-hackathon25-jupyter
-        tag: v0.3.5
+        tag: v0.3.6
       configuration:
-        base_image_tags_url: https://github.com/NaaVRE/flavors/releases/download/v0.3.5/base_image_tags.json
+        base_image_tags_url: https://github.com/NaaVRE/flavors/releases/download/v0.3.6/base_image_tags.json
         module_mapping_url: https://raw.githubusercontent.com/QCDIS/NaaVRE-conf/main/module_mapping.json
         cell_github_url: https://github.com/NaaVRE/cells-vl-biodt-hackathon25
         registry_url: ghcr.io/naavre/cells-vl-biodt-hackathon25
