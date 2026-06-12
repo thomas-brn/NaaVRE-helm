@@ -157,6 +157,22 @@ else
   echo "  client naavre patch HTTP $CODE (publicClient=false)"
 fi
 
+echo "=== 5c. Pre-fill dev user profile (skip UPDATE_PROFILE on first login) ==="
+DEV_USER_ID=$(curl -sk --max-time 60 -H "Authorization: Bearer $TOKEN" \
+  "${BASE}/admin/realms/vre/users?username=user&exact=true" | jq -r '.[0].id // empty')
+if [ -n "$DEV_USER_ID" ]; then
+  EXISTING=$(curl -sk --max-time 60 -H "Authorization: Bearer $TOKEN" \
+    "${BASE}/admin/realms/vre/users/${DEV_USER_ID}")
+  UPDATED_USER=$(echo "$EXISTING" | jq '.email = "user@example.org" | .emailVerified = true | .firstName = "User" | .lastName = "Dev" | .requiredActions = []')
+  CODE=$(curl -sk --max-time 120 -w '%{http_code}' -o /dev/null \
+    -X PUT "${BASE}/admin/realms/vre/users/${DEV_USER_ID}" \
+    -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+    -d "$UPDATED_USER")
+  echo "  user profile patch HTTP $CODE"
+else
+  echo "  WARN: dev user 'user' not found — skip profile patch"
+fi
+
 echo "  realm issuer:"
 curl -sk --max-time 60 "${BASE}/realms/vre/.well-known/openid-configuration" | jq -r '.issuer // .error'
 kill $PF 2>/dev/null || true
