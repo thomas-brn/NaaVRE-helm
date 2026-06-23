@@ -96,3 +96,4 @@ naavre-catalogue-service:
       path: /
       port: http
     initialDelaySeconds: 90
+
